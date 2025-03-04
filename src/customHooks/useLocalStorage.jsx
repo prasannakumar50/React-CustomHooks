@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
 
-export function useLocalStorage(item, inputValue = null) {
-  const [value, setValue] = useState(() => {
-    const storedValue = localStorage.getItem("value") || inputValue;
-    console.log("Stored Value..", storedValue);
-    return storedValue;
-  });
+export function useLocalStorage(key, initialValue = "") {
+    const [value, setValue] = useState(() => {
+        const storedValue = localStorage.getItem(`${key}-current`) || initialValue;
+        console.log("Stored Value (current)..", storedValue);
+        return storedValue;
+    });
 
-  useEffect(() => {
-    if (value !== null) {
-      localStorage.setItem(item, value);
-      console.log("Updated Local Storage:", value);
-    }
-  }, [item, value]);
+    useEffect(() => {
+        const previousValue = localStorage.getItem(`${key}-current`);
 
-  return { value, setValue };
+        if (value !== null) {
+            if (previousValue !== value) {
+                localStorage.setItem(`${key}-previous`, previousValue || "");
+            }
+            localStorage.setItem(`${key}-current`, value);
+            console.log("Updated Local Storage (current):", value);
+            console.log("Updated Local Storage (previous):", previousValue);
+        }
+    }, [key, value]);
+
+    return { value, setValue };
 }
 
